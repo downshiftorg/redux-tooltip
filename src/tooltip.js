@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import ReactDOM from 'react-dom';
 import { connect } from 'react-redux';
@@ -7,51 +7,26 @@ import { adjust, resolve, originOrEl } from './utils';
 import * as styles from './styles';
 import * as themes from './themes';
 
-class Tooltip extends Component {
-  static get displayName() {
-    return 'Tooltip';
+type Props = {
+  show: boolean,
+  origin: string | Object,
+  el: Object,
+  place: string | Array,
+  content: string | Object | Array<Object>,
+  auto: boolean,
+  within: (*) => *,
+}
+
+class Tooltip extends React.Component<Props> {
+  static defaultProps = {
+    show: false,
+    place: 'top',
+    auto: true,
+    id: 'tooltip',
+    className: 'tooltip',
   }
 
-  static get propTypes() {
-    return {
-      // Props from state tree
-      show: PropTypes.bool.isRequired,
-      origin: PropTypes.oneOfType([
-        PropTypes.object, PropTypes.string
-      ]),
-      el: PropTypes.object,
-      place: PropTypes.oneOfType([
-        PropTypes.string, PropTypes.array
-      ]).isRequired,
-      content: PropTypes.oneOfType([
-        PropTypes.string,
-        PropTypes.object,
-        PropTypes.arrayOf(PropTypes.object)
-      ]),
-      auto: PropTypes.bool.isRequired,
-      within: PropTypes.func,
-
-      // Props from wrapper props
-      name: PropTypes.string,
-      id: PropTypes.string,
-      className: PropTypes.string,
-      onHover: PropTypes.func,
-      onLeave: PropTypes.func,
-    };
-  }
-
-  static get defaultProps() {
-    return {
-      show: false,
-      place: 'top',
-      auto: true,
-    };
-  }
-
-  constructor(props) {
-    super(props);
-    this.state = {};
-  }
+  state = {}
 
   componentWillReceiveProps(nextProps) {
     const { place, content, children } = nextProps;
@@ -79,52 +54,41 @@ class Tooltip extends Component {
     return content ? content : props.children;
   }
 
-  render () {
+  render() {
     const { id, className, show, onHover, onLeave } = this.props;
     const origin = originOrEl(this.props);
     const { place, offset } = this.state;
     const content = this.children();
     const visibility = (origin && show) ? 'visible' : 'hidden';
-    const style = {
-      base: { ...styles.base, ...themes.simple.base, visibility, ...offset },
-      content: { ...styles.content, ...themes.simple.content },
-      arrow: { ...styles.arrow },
-      border: { ...themes.simple.border, ...styles.border.base, ...styles.border[place],  },
-    };
-    style.shadow = { ...style.content, visibility: 'hidden', position: 'absolute' };
+    const style = { visibility, ...offset };
 
     return (
-      <div>
+      <div className={className}>
         <div
           ref={e => {this.tooltip = e;}}
-          style={style.base}
+          style={style}
           id={id}
-          className={className}
+          className={`${id}-main`}
           onMouseEnter={onHover}
           onMouseLeave={onLeave}
         >
           <div
             ref={e => {this.content = e;}}
-            style={style.content}
             id={`${id}-content`}
-            className={`${className}-content`}
+            className={`${id}-content`}
           >
             {content}
           </div>
           <div
-            style={style.arrow}
             id={`${id}-arrow`}
-            className={`${className}-arrow`}
+            className={`${id}-arrow ${id}-arrow-${place}`}
             key={`a-${place}`}
-          >
-            <span ref={e => {this.border = e;}} style={style.border} key={`b-${place}`}></span>
-          </div>
+          />
         </div>
         <div
           ref={e => {this.shadow = e;}}
-          style={style.shadow}
           id={`${id}-shadow`}
-          className={`${className}-shadow`}
+          className={`${id}-shadow`}
         />
       </div>
     );

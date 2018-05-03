@@ -37,10 +37,10 @@ const vertical = {
 
 const horizontal = {
   top: '50%',
-  marginTop: '-8px',
+  marginTop: '-10px',
 };
 
-export const border = {
+export const arrow_main = {
   base: {
     display: 'block',
     width: 0,
